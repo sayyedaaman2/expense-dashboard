@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
-
+import bcrypt from 'bcrypt'
 interface IUser extends Document {
   name?: string;
   email: string;
@@ -26,6 +26,12 @@ const userSchema = new Schema<IUser>(
     timestamps: true,
   }
 );
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
+
+  this.password = await bcrypt.hash(this.password, 10);
+});
+
 
 // In Next.js / hot-reload environments, reuse existing model if it exists
 const User: Model<IUser> =
